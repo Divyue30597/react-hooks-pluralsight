@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useEffect, useRef, useState } from 'react';
 
 const ImageToggleOnScroll = ({ primaryImg, secondaryImg }) => {
   const imageRef = useRef(null);
@@ -12,16 +12,13 @@ const ImageToggleOnScroll = ({ primaryImg, secondaryImg }) => {
 
   const [inView, setInView] = useState(false);
 
-  // We are mounting the events with the useEffects when the components first mounts. Then, we are passing a function as first parameter, which will get executed when the component mounts. We need to remove this event listener before the component unmounts so we are returning another function that will remove the listener.
-  // useEffect, knowing that the first parameter we pass into useEffect is a function that gets executed after the component has completely rendered the first time. By putting in an empty array as the second parameter of useEffect, we are telling it to only run the function passed in as the first parameter after the component renders and not on subsequent updates.
   useEffect(() => {
     setIsLoading(false);
     setInView(isInView());
-    window.addEventListener("scroll", scrollHandler);
+    window.addEventListener('scroll', scrollHandler);
     return () => {
-      window.removeEventListener("scroll", scrollHandler);
+      window.removeEventListener('scroll', scrollHandler);
     };
-    // We can add the dependency array since we don't need to add and remove the scroll listeners on every component update, let's pass in an empty array, which tells useEffect to only run when the component is first rendered.
   }, []);
 
   const scrollHandler = () => {
@@ -32,15 +29,15 @@ const ImageToggleOnScroll = ({ primaryImg, secondaryImg }) => {
     <img
       src={
         isLoading
-          ? "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
+          ? 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==' // 1x1gif
           : inView
           ? secondaryImg
           : primaryImg
       }
       alt=""
+      ref={imageRef}
       width="200"
       height="200"
-      ref={imageRef}
     />
   );
 };

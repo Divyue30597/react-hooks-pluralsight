@@ -110,5 +110,3 @@ export default ImageToggleOnMouseHover;
 
 ![useEffect-hook-2](./img/reacr-useEffect-hook-2.jpg)
 
-# Refer react hooks further repo
- npm i eslint-plugin-react-hooks eslint-plugin-react eslint

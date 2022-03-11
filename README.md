@@ -409,3 +409,23 @@ const heartFavoriteHandler = useCallback((event, favoriteValue) => {
 **useCallback** - gave us a nice performance gain by not having all our speaker detail pages have to re‑render on every button click of any speaker.
 
 **useMemo** - to cache some data on our client, saving some compute time on our app, and hopefully making it more responsive in the process.
+
+# Functional vs Class component
+
+## useState
+
+![useState](./img/useState.png)
+
+![useState - Functional vs class component](./img/useState%20-%20functional%20v%20class%20component.png)
+
+## useRef
+
+![useRef](./img/useRef.png)
+
+![useRef - Functional vs Class component](./img/useEffect%20-%20functional%20vs%20class%20component.png)
+
+## useEffect
+
+![useEffect](./img/useEffect.png)
+
+![useEfect - Functional vs class component](./img/useEffect%20-%20functional%20vs%20class%20component.png)

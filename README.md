@@ -429,3 +429,85 @@ const heartFavoriteHandler = useCallback((event, favoriteValue) => {
 ![useEffect](./img/useEffect.png)
 
 ![useEfect - Functional vs class component](./img/useEffect%20-%20functional%20vs%20class%20component.png)
+
+# Creating Custom hooks
+
+```javascript
+// Before Refactoring
+
+import React, { useReducer, useState } from "react";
+import useInterval from "./useInterval";
+
+function EmailValidatingForm() {
+  // 1. we have a validateEmail function that uses a regex expression to validate an email address.
+  const validateEmail = (email) => {
+    const re =
+      /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+    return re.test(email);
+  };
+  // 2. Then, we declare with useState a boolean that defaults our emailValid state to false. That's because we will start with an empty text string, which is not a valid email.
+  const [emailValid, setEmailValid] = useState(false);
+
+  const emailReducer = (state, action) => {
+    const isValidEmail = validateEmail(action);
+    setEmailValid(isValidEmail);
+    return action;
+  };
+  // 3. Then, we create our email state. But instead of using useState, we create a simple reducer using useReducer. By replacing useState with useReducer, our first parameter to useReducer is now the reducer function named emailReducer. And the second parameter is the initial value of the associated state.
+  // 4. Issue if we used useState is that we won't be able to validate the email. Since we will be just using setEmail to set email's state and further not validating it on the go. which is what we want.
+  // With the help of the reducer we are using the setEmailValid and we are updating the state of the email after validating. And both the states are in sync.
+  const [email, setEmail] = useReducer(emailReducer, "");
+
+  const maxSeconds = 30;
+
+  const [count, setCount] = useState(maxSeconds);
+
+  useInterval(() => {
+    setCount(count - 1);
+  }, 1000);
+
+  return (
+    <div className="container">
+      <br />
+      <div>
+        <div className="content">
+          <input
+            onChange={(e) => {
+              setEmail(e.target.value);
+            }}
+            disabled={count <= 0}
+            value={email}
+            placeholder="Enter Email"
+            type="email"
+            name="email"
+            required
+          />
+          &nbsp;&nbsp;&nbsp;
+          <button
+            disabled={!emailValid || count <= 0}
+            onClick={() => {
+              setCount(0);
+              alert(`button clicked with email ${email}`);
+            }}
+            className="btn-lg"
+            type="submit"
+          >
+            PRESS ME!
+          </button>
+          <div>{count > 0 ? `You Have ${count} Seconds To Enter Your Email` : "Email Entered or Time Expired"}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default EmailValidatingForm;
+
+// After refactoring to different files
+
+// useEmailValidatingForm.js -> custom hook
+
+
+
+```

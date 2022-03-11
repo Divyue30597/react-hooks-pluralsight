@@ -14,35 +14,13 @@ import { ConfigContext } from "./App";
 import speakersReducer from "./speakerReducer";
 
 const Speakers = () => {
-  // const [speakerList, setSpeakerList] = useState([]);
 
-  const [speakerList, dispatch] = useReducer(speakersReducer, []);
-
-  const [isLoading, setIsLoading] = useState(true);
+  // const [isLoading, setIsLoading] = useState(true);
   const [speakingSat, setSpeakingSat] = useState(true);
   const [speakingSun, setSpeakingSun] = useState(true);
 
-  // Usinf useContext get a reference to our ConfigContext
+  // Using useContext get a reference to our ConfigContext
   const context = useContext(ConfigContext);
-
-  useEffect(() => {
-    setIsLoading(true);
-    new Promise((resolve) => {
-      setTimeout(() => {
-        resolve();
-      }, 1000);
-    }).then(() => {
-      setIsLoading(false);
-    });
-    // setSpeakerList(SpeakerData);
-    dispatch({
-      type: "setSpeakerList",
-      data: SpeakerData,
-    });
-    return () => {
-      console.log("clean up");
-    };
-  }, []);
 
   const handleChangeSaturday = () => {
     setSpeakingSat(!speakingSat);
@@ -69,13 +47,13 @@ const Speakers = () => {
   );
 
   const speakerListFiltered = isLoading ? [] : newSpeakerList;
-
+  // Looking at our heartFavoriteHandler, this is basically unchanged since it just calls dispatch and doesn't update either our isLoading or speakerList state directly. We did rename sessionId to id.
   const heartFavoriteHandler = useCallback((event, favoriteValue) => {
     event.preventDefault();
     const sessionId = parseInt(event.target.attributes["data-sessionId"].value);
     dispatch({
       type: favoriteValue === true ? "favorite" : "unfavorite",
-      sessionId: sessionId,
+      id: sessionId,
     });
     // setSpeakerList(
     //   speakerList.map((item) => {

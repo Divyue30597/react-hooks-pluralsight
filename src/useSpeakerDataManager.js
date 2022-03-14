@@ -1,6 +1,7 @@
 import React, { useReducer, useEffect } from "react";
 import speakersReducer from "./speakersReducer";
 import SpeakerData from "./SpeakerData";
+import axios from "axios";
 
 function useSpeakerDataManager() {
   // const [speakerList, setSpeakerList] = useState([]);
@@ -19,22 +20,34 @@ function useSpeakerDataManager() {
   );
 
   function toggleSpeakerFavorite(speakerRec) {
-    speakerRec.favorite === true
-      ? dispatch({ type: "unfavorite", id: speakerRec.id })
-      : dispatch({ type: "favorite", id: speakerRec.id });
+    (async () => {
+      axios.put(`api/speakers/${speakerRec.id}`, {
+        ...speakerRec,
+        favorite: !speakerRec.favorite,
+      });
+      speakerRec.favorite === true
+        ? dispatch({ type: "unfavorite", id: speakerRec.id })
+        : dispatch({ type: "favorite", id: speakerRec.id });
+    })();
   }
 
   useEffect(() => {
-    new Promise((resolve) => {
-      setTimeout(() => {
-        resolve();
-      }, 1000);
-    }).then(() => {
-      dispatch({
-        type: "setSpeakerList",
-        data: SpeakerData,
-      });
-    });
+    // new Promise((resolve) => {
+    //   setTimeout(() => {
+    //     resolve();
+    //   }, 1000);
+    // }).then(() => {
+    //   dispatch({
+    //     type: "setSpeakerList",
+    //     data: SpeakerData,
+    //   });
+    // });
+
+    (async () => {
+      let result = await axios.get("/api/speakers");
+      dispatch({ type: "setSpeakerList", data: result.data });
+    })();
+
     return () => {
       console.log("clean up");
     };

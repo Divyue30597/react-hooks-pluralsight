@@ -13,6 +13,7 @@
   "author": "Peter Kellner",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.26.1",
     "eslint": "^8.10.0",
     "eslint-plugin-react": "^7.29.3",
     "eslint-plugin-react-hooks": "^4.3.0",

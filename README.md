@@ -655,7 +655,7 @@ const Speakers = () => {
   );
 
   const speakerListFiltered = isLoading ? [] : newSpeakerList;
- 
+
   // Looking at our heartFavoriteHandler, this is basically unchanged since it just calls dispatch and doesn't update either our isLoading or speakerList state directly. We did rename sessionId to id.
   const heartFavoriteHandler = useCallback((event, favoriteValue) => {
     event.preventDefault();
@@ -738,6 +738,190 @@ export default Speakers;
 
 ///////////////////////////////-------------------------------///////////////////////////////
 
+// Speakers.js file
 
+import React, { useState, useContext, useCallback, useMemo } from "react";
+import { Header } from "./Header";
+import { Menu } from "./Menu";
+import SpeakerDetail from "./SpeakerDetail";
+import { ConfigContext } from "./App";
+import useSpeakerDataManager from "./useSpeakerDataManager";
+
+const Speakers = () => {
+  // const [isLoading, setIsLoading] = useState(true);
+  const [speakingSat, setSpeakingSat] = useState(true);
+  const [speakingSun, setSpeakingSun] = useState(true);
+
+  // Using useContext get a reference to our ConfigContext
+  const context = useContext(ConfigContext);
+
+  const { isLoading, speakerList, toggleSpeakerFavorite } =
+    useSpeakerDataManager();
+
+  const handleChangeSaturday = () => {
+    setSpeakingSat(!speakingSat);
+  };
+
+  const handleChangeSunday = () => {
+    setSpeakingSun(!speakingSun);
+  };
+
+  const newSpeakerList = useMemo(
+    () =>
+      speakerList
+        .filter(({ sat, sun }) => (speakingSat && sat) || (speakingSun && sun))
+        .sort((a, b) => {
+          if (a.firstName < b.firstName) {
+            return -1;
+          }
+          if (a.firstName > b.firstName) {
+            return 1;
+          }
+          return 0;
+        }),
+    [speakingSun, speakingSat, speakerList]
+  );
+
+  const speakerListFiltered = isLoading ? [] : newSpeakerList;
+
+  // refactoring
+  const heartFavoriteHandler = useCallback((event, speakerRec) => {
+    event.preventDefault();
+    toggleSpeakerFavorite(speakerRec);
+  }, []);
+
+  if (isLoading) return <div>Loading...</div>;
+
+  return (
+    <div>
+      <Header />
+      <Menu />
+      <div className="container">
+        <div className="btn-toolbar margintopbottom5 checkbox-bigger">
+          {/* This will display / not display depending on the context mentioned in the app file. */}
+          {context.showSpeakerSpeakingDays === false ? null : (
+            <div className="hide">
+              <div className="form-check-inline">
+                <label className="form-check-label">
+                  <input
+                    type="checkbox"
+                    className="form-check-input"
+                    onChange={handleChangeSaturday}
+                    checked={speakingSat}
+                  />
+                  Saturday Speaker
+                </label>
+              </div>
+              <div className="form-check-inline">
+                <label className="form-check-label">
+                  <input
+                    type="checkbox"
+                    className="form-check-input"
+                    onChange={handleChangeSunday}
+                    checked={speakingSun}
+                  />
+                  Sunday Speaker
+                </label>
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="row">
+          <div className="card-deck">
+            {speakerListFiltered.map((speakerRec) => {
+              return (
+                <SpeakerDetail
+                  key={speakerRec.id}
+                  speakerRec={speakerRec}
+                  onHeartFavoriteHandler={heartFavoriteHandler}
+                />
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Speakers;
+
+// useSpeakerDataManager.js file
+
+import React, { useReducer, useEffect } from "react";
+import speakersReducer from "./speakersReducer";
+import SpeakerData from "./SpeakerData";
+
+function useSpeakerDataManager() {
+  const [{ isLoading, speakerList }, dispatch] = useReducer(
+    speakersReducer,
+    {
+      isLoading: true,
+      speakerList: [],
+    }
+  );
+
+  function toggleSpeakerFavorite(speakerRec) {
+    speakerRec.favorite === true
+      ? dispatch({ type: "unfavorite", id: speakerRec.id })
+      : dispatch({ type: "favorite", id: speakerRec.id });
+  }
+
+  useEffect(() => {
+    new Promise((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 1000);
+    }).then(() => {
+      dispatch({
+        type: "setSpeakerList",
+        data: SpeakerData,
+      });
+    });
+    return () => {
+      console.log("clean up");
+    };
+  }, []);
+
+  return { isLoading, speakerList, toggleSpeakerFavorite };
+}
+
+export default useSpeakerDataManager;
+
+// SpeakerDetail.js file
+
+import React from "react";
+import ImageToggleOnScroll from "./ImageToggleOnScroll";
+
+const SpeakerDetail = ({ speakerRec, onHeartFavoriteHandler }) => {
+  const { id, firstName, lastName, bio, favorite } = speakerRec;
+  console.log(`Speaker details: ${id} ${firstName} ${lastName} ${favorite}`);
+  return (
+    <div className="card col-4 cardmin">
+      <ImageToggleOnScroll
+        className="card-img-top"
+        primaryImg={`/static/speakers/bw/Speaker-${id}.jpg`}
+        secondaryImg={`/static/speakers/Speaker-${id}.jpg`}
+        alt={`${firstName} ${lastName}`}
+      />
+      <div className="card-body">
+        <h4 className="card-title">
+          <button
+            className={favorite ? "heartredbutton" : "heartdarkbutton"}
+            onClick={(event) => {
+              onHeartFavoriteHandler(event, speakerRec);
+            }}
+          />
+          <span>
+            {firstName} {lastName}
+          </span>
+        </h4>
+        <span>{bio}</span>
+      </div>
+    </div>
+  );
+};
+
+export default React.memo(SpeakerDetail);
 
 ```

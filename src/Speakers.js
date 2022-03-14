@@ -1,26 +1,20 @@
-import React, {
-  useEffect,
-  useState,
-  useContext,
-  useReducer,
-  useCallback,
-  useMemo,
-} from "react";
+import React, { useState, useContext, useCallback, useMemo } from "react";
 import { Header } from "./Header";
 import { Menu } from "./Menu";
-import SpeakerData from "./SpeakerData";
 import SpeakerDetail from "./SpeakerDetail";
 import { ConfigContext } from "./App";
-import speakersReducer from "./speakerReducer";
+import useSpeakerDataManager from "./useSpeakerDataManager";
 
 const Speakers = () => {
-
   // const [isLoading, setIsLoading] = useState(true);
   const [speakingSat, setSpeakingSat] = useState(true);
   const [speakingSun, setSpeakingSun] = useState(true);
 
   // Using useContext get a reference to our ConfigContext
   const context = useContext(ConfigContext);
+
+  const { isLoading, speakerList, toggleSpeakerFavorite } =
+    useSpeakerDataManager();
 
   const handleChangeSaturday = () => {
     setSpeakingSat(!speakingSat);
@@ -47,22 +41,34 @@ const Speakers = () => {
   );
 
   const speakerListFiltered = isLoading ? [] : newSpeakerList;
+
   // Looking at our heartFavoriteHandler, this is basically unchanged since it just calls dispatch and doesn't update either our isLoading or speakerList state directly. We did rename sessionId to id.
-  const heartFavoriteHandler = useCallback((event, favoriteValue) => {
+  // const heartFavoriteHandler = useCallback((event, favoriteValue) => {
+  //   event.preventDefault();
+  //   const sessionId = parseInt(event.target.attributes["data-sessionId"].value);
+  //   toggleSpeakerFavorite();
+
+  // --- after dispatch ---
+  // dispatch({
+  //   type: favoriteValue === true ? "favorite" : "unfavorite",
+  //   id: sessionId,
+  // });
+
+  // --- before dispatch ---
+  // setSpeakerList(
+  //   speakerList.map((item) => {
+  //     if (item.id === sessionId) {
+  //       return { ...item, favorite: favoriteValue };
+  //     }
+  //     return item;
+  //   })
+  // );
+  // }, []);
+
+  // refactoring
+  const heartFavoriteHandler = useCallback((event, speakerRec) => {
     event.preventDefault();
-    const sessionId = parseInt(event.target.attributes["data-sessionId"].value);
-    dispatch({
-      type: favoriteValue === true ? "favorite" : "unfavorite",
-      id: sessionId,
-    });
-    // setSpeakerList(
-    //   speakerList.map((item) => {
-    //     if (item.id === sessionId) {
-    //       return { ...item, favorite: favoriteValue };
-    //     }
-    //     return item;
-    //   })
-    // );
+    toggleSpeakerFavorite(speakerRec);
   }, []);
 
   if (isLoading) return <div>Loading...</div>;
@@ -103,21 +109,15 @@ const Speakers = () => {
         </div>
         <div className="row">
           <div className="card-deck">
-            {speakerListFiltered.map(
-              ({ id, firstName, lastName, bio, favorite }) => {
-                return (
-                  <SpeakerDetail
-                    key={id}
-                    id={id}
-                    favorite={favorite}
-                    firstName={firstName}
-                    lastName={lastName}
-                    bio={bio}
-                    onHeartFavoriteHandler={heartFavoriteHandler}
-                  />
-                );
-              }
-            )}
+            {speakerListFiltered.map((speakerRec) => {
+              return (
+                <SpeakerDetail
+                  key={speakerRec.id}
+                  speakerRec={speakerRec}
+                  onHeartFavoriteHandler={heartFavoriteHandler}
+                />
+              );
+            })}
           </div>
         </div>
       </div>

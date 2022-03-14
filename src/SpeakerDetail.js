@@ -1,14 +1,8 @@
 import React from "react";
 import ImageToggleOnScroll from "./ImageToggleOnScroll";
 
-const SpeakerDetail = ({
-  id,
-  firstName,
-  lastName,
-  bio,
-  favorite,
-  onHeartFavoriteHandler,
-}) => {
+const SpeakerDetail = ({ speakerRec, onHeartFavoriteHandler }) => {
+  const { id, firstName, lastName, bio, favorite } = speakerRec;
   console.log(`Speaker details: ${id} ${firstName} ${lastName} ${favorite}`);
   return (
     <div className="card col-4 cardmin">
@@ -21,10 +15,9 @@ const SpeakerDetail = ({
       <div className="card-body">
         <h4 className="card-title">
           <button
-            data-sessionId={id}
             className={favorite ? "heartredbutton" : "heartdarkbutton"}
             onClick={(event) => {
-              onHeartFavoriteHandler(event, !favorite);
+              onHeartFavoriteHandler(event, speakerRec);
             }}
           />
           <span>

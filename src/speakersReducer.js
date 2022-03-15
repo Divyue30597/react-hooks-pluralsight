@@ -29,7 +29,12 @@ function speakersReducer(state, action) {
 
       // return an object that first spreads the existing state, then follows that with a state we want to replace. In this case, that's just setting the speakerList property to action.data.
       //  Here is our first benefit we get from including the state isLoading in our reducer. After we set the speakerList, we also want to set IsLoading to false. We can do it right here, just add another property, after spreading state, set isLoading to false.
-      return { ...state, speakerList: action.data, isLoading: false };
+      return {
+        ...state,
+        speakerList: action.data,
+        isLoading: false,
+        hasErrored: false,
+      };
     }
     case "favorite": {
       // We need to update this as well. Commenting out the below code
@@ -49,6 +54,9 @@ function speakersReducer(state, action) {
     }
     case "incrementFavoriteClickCount": {
       return { ...state, favoriteClickCount: state.favoriteClickCount + 1 };
+    }
+    case "errored": {
+      return { ...state, hasErrored: true, error: action.error };
     }
     default:
       return state;

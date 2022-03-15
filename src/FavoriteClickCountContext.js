@@ -18,6 +18,8 @@ export const FavoriteClickCountProvider = ({ children }) => {
     return { incrementFavoriteClickCount };
   }, []);
 
+  // The technique used here is very extensible. It gives you the flexibility to create a true global state that can cover a significant amount of functionality and, at the same time, let you optimize performance around specific tasks. I put both contexts around the full app just for demonstration. But in your apps, which I expect will be much more complex than this, I expect that you'd wrap the context just around the component trees where it makes sense.
+  
   return (
     <FavoriteClickCountContext.Provider value={provider}>
       {children}

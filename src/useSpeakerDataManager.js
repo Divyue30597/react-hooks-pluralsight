@@ -13,13 +13,18 @@ function useSpeakerDataManager() {
 
   // const initialSpeakerData = useContext(InitialSpeakerDataContext);
 
-  const [{ isLoading, speakerList, favoriteClickCount }, dispatch] = useReducer(
+  const [
+    { isLoading, speakerList, favoriteClickCount, hasErrored, error },
+    dispatch,
+  ] = useReducer(
     speakersReducer,
     // change our useReducer initialization to initialize our stateObject instead of just the speakerList, so that becomes an object notation, isLoading set to true and speakerList set to an empty array.
     {
       isLoading: true,
       speakerList: [],
       favoriteClickCount: 0,
+      hasErrored: false,
+      error: null,
     }
   );
 
@@ -62,8 +67,12 @@ function useSpeakerDataManager() {
     // });
 
     (async () => {
-      let result = await axios.get("/api/speakers");
-      dispatch({ type: "setSpeakerList", data: result.data });
+      try {
+        let result = await axios.get("/api/speakers");
+        dispatch({ type: "setSpeakerList", data: result.data });
+      } catch (error) {
+        dispatch({ type: "errored", error: error });
+      }
     })();
 
     return () => {
@@ -75,6 +84,8 @@ function useSpeakerDataManager() {
     isLoading,
     speakerList,
     favoriteClickCount,
+    hasErrored,
+    error,
     incrementFavoriteClickCount,
     toggleSpeakerFavorite,
   };

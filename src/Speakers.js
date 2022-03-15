@@ -15,7 +15,7 @@ const Speakers = () => {
 
   // We will comment out here since we are creating global context. Next what we do is copy the same code in the GlobalState.js file. And we will provide the Global State context here.
   // We've taken the return from our custom Hook that we called in GlobalState, and we've gotten a reference to that now in our Speakers component.
-  const { isLoading, speakerList, toggleSpeakerFavorite } =
+  const { isLoading, speakerList, toggleSpeakerFavorite, hasErrored, error } =
     useContext(GlobalContext);
 
   // const { isLoading, speakerList, toggleSpeakerFavorite } =
@@ -76,6 +76,7 @@ const Speakers = () => {
     toggleSpeakerFavorite(speakerRec);
   }, []);
 
+  if (hasErrored === true) return <div>Error: {error.message}</div>;
   if (isLoading) return <div>Loading...</div>;
 
   return (

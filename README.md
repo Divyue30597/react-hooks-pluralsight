@@ -923,5 +923,246 @@ const SpeakerDetail = ({ speakerRec, onHeartFavoriteHandler }) => {
 };
 
 export default React.memo(SpeakerDetail);
+```
 
+# Server Side rendering
+
+```javascript
+// before refactoring
+
+import React from "react";
+import App from "../src/App";
+
+function speakers() {
+  return <App pageName="Speakers" />;
+}
+
+export default speakers;
+
+////////////////--------------////////////////
+
+// after refactoring
+
+import React from "react";
+import App from "../src/App";
+import path from "path";
+import fs from "fs";
+
+export const InitialSpeakerDataContext = React.createContext();
+
+export async function getServerSideProps() {
+  // Ultimately, what's returned from this method that's running on the Next.js
+  // server is a JavaScript object with a props property. Typically, the first
+  // thing that happens when the server method is called is that all external
+  // dependencies for this user's web page need to be fulfilled. Typically, those
+  // are things like database calls, calls to external services, like REST calls,
+  // or any other request dependency. Then the results of those external calls are
+  // returned as prop objects.
+
+  const { promisify } = require("util");
+  const readFile = promisify(fs.readFile);
+  const jsonData = path.resolve("./", "db.json");
+  let initialSpeakerData;
+  try {
+    const readFileData = await readFile(jsonData);
+    initialSpeakerData = JSON.parse(readFileData).speakers;
+  } catch (error) {
+    console.log("/api/speakers error:", error);
+  }
+
+  return { props: { initialSpeakerData } };
+}
+
+function speakers({ initialSpeakerData }) {
+  return (
+    <InitialSpeakerDataContext.Provider value={initialSpeakerData}>
+      <App pageName="Speakers" />
+    </InitialSpeakerDataContext.Provider>
+  );
+}
+
+export default speakers;
+
+////////////////////// speaker.js file //////////////////////
+
+import React, { useState, useContext, useCallback, useMemo } from "react";
+import { Header } from "./Header";
+import { Menu } from "./Menu";
+import SpeakerDetail from "./SpeakerDetail";
+import { ConfigContext } from "./App";
+import useSpeakerDataManager from "./useSpeakerDataManager";
+
+const Speakers = () => {
+  // const [isLoading, setIsLoading] = useState(true);
+  const [speakingSat, setSpeakingSat] = useState(true);
+  const [speakingSun, setSpeakingSun] = useState(true);
+
+  // Using useContext get a reference to our ConfigContext
+  const context = useContext(ConfigContext);
+
+  const { isLoading, speakerList, toggleSpeakerFavorite } =
+    useSpeakerDataManager();
+
+  const handleChangeSaturday = () => {
+    setSpeakingSat(!speakingSat);
+  };
+
+  const handleChangeSunday = () => {
+    setSpeakingSun(!speakingSun);
+  };
+
+  const newSpeakerList = useMemo(
+    () =>
+      speakerList
+        .filter(({ sat, sun }) => (speakingSat && sat) || (speakingSun && sun))
+        .sort((a, b) => {
+          if (a.firstName < b.firstName) {
+            return -1;
+          }
+          if (a.firstName > b.firstName) {
+            return 1;
+          }
+          return 0;
+        }),
+    [speakingSun, speakingSat, speakerList]
+  );
+
+  const speakerListFiltered = isLoading ? [] : newSpeakerList;
+
+  // refactoring
+  const heartFavoriteHandler = useCallback((event, speakerRec) => {
+    event.preventDefault();
+    toggleSpeakerFavorite(speakerRec);
+  }, []);
+
+  if (isLoading) return <div>Loading...</div>;
+
+  return (
+    <div>
+      <Header />
+      <Menu />
+      <div className="container">
+        <div className="btn-toolbar margintopbottom5 checkbox-bigger">
+          {/* This will display / not display depending on the context mentioned in the app file. */}
+          {context.showSpeakerSpeakingDays === false ? null : (
+            <div className="hide">
+              <div className="form-check-inline">
+                <label className="form-check-label">
+                  <input
+                    type="checkbox"
+                    className="form-check-input"
+                    onChange={handleChangeSaturday}
+                    checked={speakingSat}
+                  />
+                  Saturday Speaker
+                </label>
+              </div>
+              <div className="form-check-inline">
+                <label className="form-check-label">
+                  <input
+                    type="checkbox"
+                    className="form-check-input"
+                    onChange={handleChangeSunday}
+                    checked={speakingSun}
+                  />
+                  Sunday Speaker
+                </label>
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="row">
+          <div className="card-deck">
+            {speakerListFiltered.map((speakerRec) => {
+              return (
+                <SpeakerDetail
+                  key={speakerRec.id}
+                  speakerRec={speakerRec}
+                  onHeartFavoriteHandler={heartFavoriteHandler}
+                />
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Speakers;
+
+////////////////////// useSpeakerDataManager.js file //////////////////////
+
+import React, { useReducer, useEffect, useContext } from "react";
+import speakersReducer from "./speakersReducer";
+import SpeakerData from "./SpeakerData";
+import axios from "axios";
+// import { InitialSpeakerDataContext } from "../pages/speakers";
+
+function useSpeakerDataManager() {
+  // const [speakerList, setSpeakerList] = useState([]);
+  // 1. SpeakerList(array of speakers) and isLoading(tracks speakerList is loaded or not) are related.
+  // What we need? ->  Our plan here is to replace the state useReducer isTracking to be an object containing multiple properties rather than what it is now, which is just one property, speakerList.
+  // The below code will be updated to code on line 23 and comment out isLoading state. After making these changes we need to update our useReducer as well since now we are passing an object to our action
+  // const [speakerList, dispatch] = useReducer(speakersReducer, []);
+
+  // const initialSpeakerData = useContext(InitialSpeakerDataContext);
+
+  const [{ isLoading, speakerList }, dispatch] = useReducer(
+    speakersReducer,
+    // change our useReducer initialization to initialize our stateObject instead of just the speakerList, so that becomes an object notation, isLoading set to true and speakerList set to an empty array.
+    {
+      isLoading: true,
+      speakerList: [],
+    }
+  );
+
+  // ! This is for Server Side rendering.
+  // const [{ isLoading, speakerList }, dispatch] = useReducer(
+  //   speakersReducer,
+  // change our useReducer initialization to initialize our stateObject instead of just the speakerList, so that becomes an object notation, isLoading set to true and speakerList set to an empty array.
+  //   {
+  //     isLoading: false,
+  //     speakerList: initialSpeakerData,
+  //   }
+  // );
+
+  function toggleSpeakerFavorite(speakerRec) {
+    (async () => {
+      axios.put(`api/speakers/${speakerRec.id}`, {
+        ...speakerRec,
+        favorite: !speakerRec.favorite,
+      });
+      speakerRec.favorite === true
+        ? dispatch({ type: "unfavorite", id: speakerRec.id })
+        : dispatch({ type: "favorite", id: speakerRec.id });
+    })();
+  }
+
+  useEffect(() => {
+    // new Promise((resolve) => {
+    //   setTimeout(() => {
+    //     resolve();
+    //   }, 1000);
+    // }).then(() => {
+    //   dispatch({
+    //     type: "setSpeakerList",
+    //     data: SpeakerData,
+    //   });
+    // });
+
+    (async () => {
+      let result = await axios.get("/api/speakers");
+      dispatch({ type: "setSpeakerList", data: result.data });
+    })();
+
+    return () => {
+      console.log("clean up");
+    };
+  }, []);
+
+  return { isLoading, speakerList, toggleSpeakerFavorite };
+}
+
+export default useSpeakerDataManager;
 ```

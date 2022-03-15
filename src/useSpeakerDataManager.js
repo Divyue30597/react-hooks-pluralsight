@@ -1,7 +1,8 @@
-import React, { useReducer, useEffect } from "react";
+import React, { useReducer, useEffect, useContext } from "react";
 import speakersReducer from "./speakersReducer";
 import SpeakerData from "./SpeakerData";
 import axios from "axios";
+// import { InitialSpeakerDataContext } from "../pages/speakers";
 
 function useSpeakerDataManager() {
   // const [speakerList, setSpeakerList] = useState([]);
@@ -9,6 +10,8 @@ function useSpeakerDataManager() {
   // What we need? ->  Our plan here is to replace the state useReducer isTracking to be an object containing multiple properties rather than what it is now, which is just one property, speakerList.
   // The below code will be updated to code on line 23 and comment out isLoading state. After making these changes we need to update our useReducer as well since now we are passing an object to our action
   // const [speakerList, dispatch] = useReducer(speakersReducer, []);
+
+  // const initialSpeakerData = useContext(InitialSpeakerDataContext);
 
   const [{ isLoading, speakerList }, dispatch] = useReducer(
     speakersReducer,
@@ -18,6 +21,16 @@ function useSpeakerDataManager() {
       speakerList: [],
     }
   );
+
+  // ! This is for Server Side rendering.
+  // const [{ isLoading, speakerList }, dispatch] = useReducer(
+  //   speakersReducer,
+  // change our useReducer initialization to initialize our stateObject instead of just the speakerList, so that becomes an object notation, isLoading set to true and speakerList set to an empty array.
+  //   {
+  //     isLoading: false,
+  //     speakerList: initialSpeakerData,
+  //   }
+  // );
 
   function toggleSpeakerFavorite(speakerRec) {
     (async () => {

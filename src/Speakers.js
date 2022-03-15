@@ -69,7 +69,7 @@ const Speakers = () => {
   const heartFavoriteHandler = useCallback((event, speakerRec) => {
     event.preventDefault();
     toggleSpeakerFavorite(speakerRec);
-  }, []);
+  }, []); 
 
   if (isLoading) return <div>Loading...</div>;
 

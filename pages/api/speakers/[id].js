@@ -13,7 +13,7 @@ export default async function handler(req, res) {
   const recordFromBody = req?.body;
 
   if (method != "PUT") {
-    res.send(501).send(`Method ${method} not implemented`);
+    res.status(501).send(`Method ${method} not implemented`);
   } else {
     const jsonData = path.resolve("./", "db.json");
     try {

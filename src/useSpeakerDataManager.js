@@ -13,16 +13,21 @@ function useSpeakerDataManager() {
 
   // const initialSpeakerData = useContext(InitialSpeakerDataContext);
 
-  const [{ isLoading, speakerList }, dispatch] = useReducer(
+  const [{ isLoading, speakerList, favoriteClickCount }, dispatch] = useReducer(
     speakersReducer,
     // change our useReducer initialization to initialize our stateObject instead of just the speakerList, so that becomes an object notation, isLoading set to true and speakerList set to an empty array.
     {
       isLoading: true,
       speakerList: [],
+      favoriteClickCount: 0,
     }
   );
 
-  // ! This is for Server Side rendering.
+  function incrementFavoriteClickCount() {
+    dispatch({ type: "incrementFavoriteClickCount" });
+  }
+
+  // This is for Server Side rendering.
   // const [{ isLoading, speakerList }, dispatch] = useReducer(
   //   speakersReducer,
   // change our useReducer initialization to initialize our stateObject instead of just the speakerList, so that becomes an object notation, isLoading set to true and speakerList set to an empty array.
@@ -66,7 +71,13 @@ function useSpeakerDataManager() {
     };
   }, []);
 
-  return { isLoading, speakerList, toggleSpeakerFavorite };
+  return {
+    isLoading,
+    speakerList,
+    favoriteClickCount,
+    incrementFavoriteClickCount,
+    toggleSpeakerFavorite,
+  };
 }
 
 export default useSpeakerDataManager;

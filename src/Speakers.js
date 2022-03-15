@@ -3,7 +3,7 @@ import { Header } from "./Header";
 import { Menu } from "./Menu";
 import SpeakerDetail from "./SpeakerDetail";
 import { ConfigContext } from "./App";
-import useSpeakerDataManager from "./useSpeakerDataManager";
+import { GlobalContext } from "./GlobalState";
 
 const Speakers = () => {
   // const [isLoading, setIsLoading] = useState(true);
@@ -13,8 +13,13 @@ const Speakers = () => {
   // Using useContext get a reference to our ConfigContext
   const context = useContext(ConfigContext);
 
+  // We will comment out here since we are creating global context. Next what we do is copy the same code in the GlobalState.js file. And we will provide the Global State context here.
+  // We've taken the return from our custom Hook that we called in GlobalState, and we've gotten a reference to that now in our Speakers component.
   const { isLoading, speakerList, toggleSpeakerFavorite } =
-    useSpeakerDataManager();
+    useContext(GlobalContext);
+
+  // const { isLoading, speakerList, toggleSpeakerFavorite } =
+  //   useSpeakerDataManager();
 
   const handleChangeSaturday = () => {
     setSpeakingSat(!speakingSat);
@@ -69,7 +74,7 @@ const Speakers = () => {
   const heartFavoriteHandler = useCallback((event, speakerRec) => {
     event.preventDefault();
     toggleSpeakerFavorite(speakerRec);
-  }, []); 
+  }, []);
 
   if (isLoading) return <div>Loading...</div>;
 

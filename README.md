@@ -1166,3 +1166,80 @@ function useSpeakerDataManager() {
 
 export default useSpeakerDataManager;
 ```
+
+# Redux like global state implementation
+
+**Note**: _*props are passed down to the children from parent component and children passes functions up when they want the state changed in the parent component*_
+
+Try to extract the code that couples the module to our custom hook and state, making it a decoupled(destructured) object and making it's own component.
+
+```javascript
+// 1.  Identifying the module where this can be implemented.
+
+// Creating a globalContext.js file.
+import React, { use } from "react";
+
+export const GlobalContext = React.createContext();
+
+export const GlobalProvider = ({ children }) => {
+  return <GlobalContext.Provider value="">{children}</GlobalContext.Provider>;
+};
+
+// Modifying the App.js file where our components connects with each other
+import React from "react";
+import Home from "./Home";
+import Speakers from "./speakers";
+import { GlobalProvider } from "./GlobalState";
+
+export const ConfigContext = React.createContext();
+
+const pageToShow = (pageName) => {
+  if (pageName === "Home") return <Home />;
+  if (pageName === "Speakers") return <Speakers />;
+  return <div>Not Found</div>;
+};
+
+const configValue = {
+  showSignMeUp: true,
+  showSpeakerSpeakingDays: true,
+};
+
+const App = ({ pageName }) => {
+  return (
+    <ConfigContext.Provider value={configValue}>
+      {/*
+      Above the context is stored at the app level. So we will need ConfigContext.Provider.
+
+      We have a full GlobalState context wrapping our app. In the next clip, we'll bring our custom Hook into our GlobalState and assign it to the context value. Then we'll consume that in our Speakers component, effectively decoupling our state management from our Speakers component.
+
+      Here the state is stored at component level. Which is for our components Speaker -> SpeakerDetail -- This is for GlobalProvider.
+      */}
+      <GlobalProvider>
+        <div>{pageToShow(pageName)}</div>
+      </GlobalProvider>
+    </ConfigContext.Provider>
+  );
+};
+
+export default App;
+```
+
+## What we have done until now??
+
+We now have our decoupled global object that is the GlobalContext we just surrounded everything  
+but our application configuration with in our React app. It's in a GlobalState.js file, but the  
+context was just an empty string assigned to it, so it's not contributing anything to our app.
+
+![redux-like-global-state](./img/redux-like-global-state.png)
+
+We have completely decoupled our custom Hook useSpeakerDataManager from our Speakers component,  
+and now we're just using the return values passed in from our GlobalContext state. Since the return  
+names from the GlobalContext are identical to the return names from the custom Hook, everything  
+in our app will look identical with no changes needed.
+
+![redux-like-global-state-2ff](./img/redux-like-global-state-2.png)
+
+Now, the problem with the existing coat is out component is rerendering on each click on favorite icon, again and again. 
+It is happening because speakerList is present in our globalState and since we update the favorite button by clicking on it everytime.  
+The component gets updated on each click.  
+We need to handle this problem. How? -> We need to create a nested Global context. 

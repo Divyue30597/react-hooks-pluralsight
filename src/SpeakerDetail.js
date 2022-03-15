@@ -1,9 +1,14 @@
-import React from "react";
+import React, { useContext } from "react";
+import { FavoriteClickCountContext } from "./FavoriteClickCountContext";
 import ImageToggleOnScroll from "./ImageToggleOnScroll";
 
 const SpeakerDetail = ({ speakerRec, onHeartFavoriteHandler }) => {
   const { id, firstName, lastName, bio, favorite } = speakerRec;
+
   console.log(`Speaker details: ${id} ${firstName} ${lastName} ${favorite}`);
+
+  const { incrementFavoriteClickCount } = useContext(FavoriteClickCountContext);
+
   return (
     <div className="card col-4 cardmin">
       <ImageToggleOnScroll
@@ -18,12 +23,14 @@ const SpeakerDetail = ({ speakerRec, onHeartFavoriteHandler }) => {
             className={favorite ? "heartredbutton" : "heartdarkbutton"}
             onClick={(event) => {
               onHeartFavoriteHandler(event, speakerRec);
+              incrementFavoriteClickCount();
             }}
           />
           <span>
             {firstName} {lastName}
           </span>
         </h4>
+        {/* <h5>Click Count: {favoriteClickCount}</h5> */}
         <span>{bio}</span>
       </div>
     </div>
